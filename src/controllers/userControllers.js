@@ -51,11 +51,12 @@ const users = [
 const database = require("../../database");
 
 const getUsers = (req, res) => {
-  res.json(users);
   database
-    .query("select * from movies")
-    .then(([users]) => {
-      res.json(users); // use res.json instead of console.log
+  .query("select * from users")
+  .then(([users]) => {
+    console.log(users);
+    res.json(users);
+
     })
     .catch((err) => {
       console.error(err);
@@ -66,9 +67,8 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const id = parseInt(req.params.id);
   database
-    .query("select * from movies where id = ?"[id])
+    .query("select * from users where id = ?",[id])
     .then(([users]) => {
-      res.json(users); // use res.json instead of console.log
       if (users[0] != null) {
         res.json(users[0]);
       } else {
@@ -79,16 +79,27 @@ const getUserById = (req, res) => {
       console.error(err);
       res.sendStatus(500);
     });
-  const movie = users.find((user) => user.id === id);
 
-  /* if (movie != null) {
-    res.json(movie);
-  } else {
-    res.status(404).send("Not Found");
-  }*/
+};
+
+const postUsers = (req, res) => {
+const {firstname, lastname, email, city, language} = req.body;
+database
+.query(
+  "INSERT INTO users(firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
+  [firstname, lastname, email, city, language]
+)
+.then(([result]) => {
+  res.status(201).send({ id: result.insertId });
+})
+.catch((err) => {
+  console.error(err);
+  res.sendStatus(500);
+})
 };
 
 module.exports = {
   getUsers,
   getUserById,
+  postUsers,
 };
